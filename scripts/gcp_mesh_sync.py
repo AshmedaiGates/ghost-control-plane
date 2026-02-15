@@ -16,6 +16,23 @@ def run(cmd):
     p = subprocess.run(cmd, capture_output=True, text=True)
     return p.returncode, (p.stdout or '').strip(), (p.stderr or '').strip()
 
+
+def ssh_cmd(info, *remote_args, batch=True):
+    host = info['host']
+    user = info.get('user', HOME.name)
+    cmd = ['ssh', '-o', 'ConnectTimeout=6']
+    if batch:
+        cmd.extend(['-o', 'BatchMode=yes'])
+
+    # Prefer dedicated GCP key if present
+    gcp_key = HOME / '.ssh' / 'gcp_vps_key'
+    if gcp_key.exists():
+        cmd.extend(['-i', str(gcp_key), '-o', 'IdentitiesOnly=yes'])
+
+    cmd.append(f'{user}@{host}')
+    cmd.extend(list(remote_args))
+    return cmd
+
 def load_nodes():
     if NODES_FILE.exists():
         return json.loads(NODES_FILE.read_text())
@@ -54,9 +71,7 @@ def list_nodes():
         print(f'  {name}: {info["host"]} ({status})')
 
 def check_node(info):
-    host = info['host']
-    user = info.get('user', HOME.name)
-    rc, _, _ = run(['ssh', '-o', 'ConnectTimeout=3', '-o', 'BatchMode=yes', f'{user}@{host}', 'echo', 'ok'])
+    rc, _, _ = run(ssh_cmd(info, 'echo', 'ok', batch=True))
     return 'up' if rc == 0 else 'down'
 
 def sync_command(command, target=None):
@@ -77,18 +92,17 @@ def sync_command(command, target=None):
     
     for name, info in targets.items():
         host = info['host']
-        user = info.get('user', HOME.name)
-        
+
         print(f'[{name}] {host}...')
-        
+
         # Check if remote has gcp
-        rc, _, _ = run(['ssh', f'{user}@{host}', 'which', 'gcp'])
+        rc, _, _ = run(ssh_cmd(info, 'which', 'gcp', batch=True))
         if rc != 0:
             print(f'  warning: gcp not found on {name}')
             continue
-        
+
         # Execute command
-        rc, out, err = run(['ssh', f'{user}@{host}', 'gcp'] + command.split())
+        rc, out, err = run(ssh_cmd(info, 'gcp', *command.split(), batch=True))
         if rc == 0:
             print(f'  ✓ success')
             if out:
@@ -115,12 +129,11 @@ def mesh_status():
     for name, info in nodes.items():
         status = check_node(info)
         host = info['host']
-        user = info.get('user', HOME.name)
-        
+
         # Check gcp version
         version = 'unknown'
         if status == 'up':
-            rc, out, _ = run(['ssh', f'{user}@{host}', 'gcp', 'update', 'status'])
+            rc, out, _ = run(ssh_cmd(info, 'gcp', 'update', 'status', batch=True))
             if rc == 0:
                 for ln in out.splitlines():
                     if 'local:' in ln:
