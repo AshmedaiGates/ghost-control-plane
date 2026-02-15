@@ -20,7 +20,7 @@ def run(cmd, cwd=None, env=None):
 
 def detect_project_type(path):
     p = Path(path)
-    if (p / 'pyproject.toml').exists() or (p / 'setup.py').exists():
+    if (p / 'pyproject.toml').exists() or (p / 'setup.py').exists() or (p / 'requirements.txt').exists():
         return 'python'
     if (p / 'package.json').exists():
         return 'node'
@@ -28,8 +28,15 @@ def detect_project_type(path):
         return 'rust'
     if (p / 'go.mod').exists():
         return 'go'
-    if list(p.glob('*.py')):
+    # Fallback: detect source trees recursively
+    if list(p.rglob('*.py')):
         return 'python'
+    if list(p.rglob('*.rs')):
+        return 'rust'
+    if list(p.rglob('*.go')):
+        return 'go'
+    if list(p.rglob('*.ts')) or list(p.rglob('*.js')):
+        return 'node'
     return 'generic'
 
 def get_default_pipeline(project_type):

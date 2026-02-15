@@ -1,0 +1,8 @@
+[Unit]
+Description=Push Ghost encrypted backups to VPS target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/gcp backup-push --apply

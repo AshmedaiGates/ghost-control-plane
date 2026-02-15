@@ -78,6 +78,13 @@ p_bak = sub.add_parser('backup', help='encrypted backups')
 p_bak.add_argument('action', choices=['status', 'init-passphrase', 'run', 'verify'])
 p_bak.add_argument('--apply', action='store_true')
 
+p_bpush = sub.add_parser('backup-push', help='push local backups to VPS target')
+p_bpush.add_argument('--apply', action='store_true')
+p_bpush.add_argument('--host', default='67.217.61.166')
+p_bpush.add_argument('--user', default='ghost')
+p_bpush.add_argument('--key', default=str(Path.home() / '.ssh' / 'gcp_vps_key'))
+p_bpush.add_argument('--remote-dir', default='/home/ghost/Backups/ghost-control-plane')
+
 p_qos = sub.add_parser('qos', help='network QoS tuning')
 p_qos.add_argument('action', choices=['status', 'default', 'gaming', 'streaming', 'rollback'])
 p_qos.add_argument('--apply', action='store_true')
@@ -259,6 +266,13 @@ if args.cmd == 'backup':
     cmd = py('gcp_backup.py', 'run')
     if args.apply:
         cmd.append('--apply')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'backup-push':
+    cmd = py('gcp_backup_push.py')
+    if args.apply:
+        cmd.append('--apply')
+    cmd.extend(['--host', args.host, '--user', args.user, '--key', args.key, '--remote-dir', args.remote_dir])
     raise SystemExit(run(cmd))
 
 if args.cmd == 'qos':
