@@ -49,7 +49,9 @@ ghost-control-plane/
     gcp_predict.py       # predictive hardware failure
     gcp_collab.py        # real-time collaboration
     gcp_storage.py       # encrypted distributed storage
-    gcp_ci.py            # automatic CI/CD  systemd/user/
+    gcp_ci.py            # automatic CI/CD
+    gcp_vps.py           # VPS provisioner
+    gcp_plan.py          # workload planner  systemd/user/
     gcp-snapshot.service
     gcp-snapshot.timer
     gcp-autopilot.service
@@ -643,6 +645,47 @@ gcp ci list                       # show pipelines
 ```
 
 Auto-detects project type (Python/Node/Rust/Go) and runs appropriate steps.
+
+## VPS Provisioner (Layer 23)
+
+`gcp_vps.py` automates VPS setup with full GCP stack:
+
+```bash
+gcp vps 203.0.113.10                    # provision new VPS
+gcp vps 203.0.113.10 --provider vultr   # provider-specific tweaks
+gcp vps 203.0.113.10 --test             # test SSH connection
+```
+
+Bootstraps:
+- System updates (apt/dnf/pacman)
+- Ghost user with sudo
+- GCP installation from GitHub
+- systemd services
+- Firewall (UFW/firewalld)
+- Automatic mesh node registration
+
+## Workload Planner (Layer 24)
+
+`gcp_plan.py` decides what runs where:
+
+```bash
+gcp plan --ram 34                       # plan for 34GB VPS
+gcp plan --compare                      # GPU vs CPU VPS costs
+```
+
+Shows optimal distribution between laptop and VPS. For your $51 34GB setup:
+- Laptop: GPU inference, gaming, dev work
+- VPS: CI/CD, CPU LLMs (13B-24B), backups, storage
+- **Savings vs GPU VPS: $250-550/mo**
+
+## Full Stack Summary
+
+**24 Layers Total:**
+1-12: Core control plane (health, scenes, autopilot, backups, etc.)
+13-15: Testing & updates
+16-18: Mesh & learning
+19-22: Prediction, collaboration, storage, CI/CD  
+23-24: VPS provisioning & planning
 
 ## Next phase ideas
 

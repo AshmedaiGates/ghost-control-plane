@@ -147,6 +147,18 @@ p_ci.add_argument('--path', default='.')
 p_ci.add_argument('--name')
 p_ci.add_argument('--deploy')
 
+p_vps = sub.add_parser('vps', help='provision VPS with GCP')
+p_vps.add_argument('ip', nargs='?', help='VPS IP address')
+p_vps.add_argument('--user', default='root', help='Initial SSH user')
+p_vps.add_argument('--ssh-key', help='Path to SSH private key')
+p_vps.add_argument('--provider', default='generic', choices=['generic', 'hetzner', 'vultr', 'digitalocean', 'linode'])
+p_vps.add_argument('--test', action='store_true', help='Test connection only')
+
+p_plan = sub.add_parser('plan', help='workload distribution planner')
+p_plan.add_argument('--ram', type=int, default=34, help='VPS RAM in GB')
+p_plan.add_argument('--gpu', action='store_true', help='VPS has GPU')
+p_plan.add_argument('--compare', action='store_true', help='Compare GPU VPS costs')
+
 sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
 
 args = parser.parse_args()
@@ -359,6 +371,27 @@ if args.cmd == 'ci':
         cmd.append(args.name)
     if args.deploy:
         cmd.extend(['--deploy', args.deploy])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'vps':
+    cmd = py('gcp_vps.py')
+    if args.ip:
+        cmd.append(args.ip)
+    cmd.extend(['--user', args.user])
+    if args.ssh_key:
+        cmd.extend(['--ssh-key', args.ssh_key])
+    cmd.extend(['--provider', args.provider])
+    if args.test:
+        cmd.append('--test')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'plan':
+    cmd = py('gcp_plan.py')
+    cmd.extend(['--ram', str(args.ram)])
+    if args.gpu:
+        cmd.append('--gpu')
+    if args.compare:
+        cmd.append('--compare')
     raise SystemExit(run(cmd))
 
 parser.print_help()
