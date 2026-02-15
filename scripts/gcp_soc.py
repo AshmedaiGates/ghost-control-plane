@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -56,6 +57,36 @@ def service_slice(text):
     return out
 
 
+def package_updates():
+    updates = {'pacman_updates': [], 'aur_updates': [], 'brew_updates': [], 'apt_updates': [], 'dnf_updates': []}
+
+    if shutil.which('pacman'):
+        rc, out, _ = run(['pacman', '-Qu'])
+        updates['pacman_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
+
+    if shutil.which('paru'):
+        rc, out, _ = run(['paru', '-Qua'])
+        updates['aur_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
+
+    if shutil.which('brew'):
+        rc, out, _ = run(['brew', 'outdated'])
+        updates['brew_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
+
+    if shutil.which('apt'):
+        # Read-only: simulate upgrade list
+        rc, out, _ = run(['apt', 'list', '--upgradable'])
+        if rc == 0:
+            updates['apt_updates'] = [ln for ln in out.splitlines()[1:] if ln.strip()]
+
+    if shutil.which('dnf'):
+        rc, out, _ = run(['dnf', 'check-update'])
+        # dnf returns 100 when updates are available
+        if rc in (0, 100):
+            updates['dnf_updates'] = [ln for ln in out.splitlines() if ln.strip() and not ln.startswith('Last metadata')]
+
+    return updates
+
+
 def collect_snapshot():
     ts = datetime.now().isoformat()
     snap = {'ts': ts}
@@ -69,14 +100,7 @@ def collect_snapshot():
     rc, out, _ = run(['systemctl', 'list-unit-files', '--type=service'])
     snap['services_interest'] = service_slice(out) if rc == 0 else []
 
-    rc, out, _ = run(['pacman', '-Qu'])
-    snap['pacman_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
-
-    rc, out, _ = run(['paru', '-Qua'])
-    snap['aur_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
-
-    rc, out, _ = run(['brew', 'outdated'])
-    snap['brew_updates'] = [ln for ln in out.splitlines() if ln.strip()] if rc == 0 else []
+    snap.update(package_updates())
 
     return snap
 
@@ -151,10 +175,23 @@ def diff_report(base, cur):
         out.extend([f'  - {x}' for x in gone_rules])
 
     # Package drift severity only if large
-    p_total = len(cur.get('pacman_updates', [])) + len(cur.get('aur_updates', [])) + len(cur.get('brew_updates', []))
+    p_total = (
+        len(cur.get('pacman_updates', []))
+        + len(cur.get('aur_updates', []))
+        + len(cur.get('brew_updates', []))
+        + len(cur.get('apt_updates', []))
+        + len(cur.get('dnf_updates', []))
+    )
     if p_total >= 20 and sev == 'INFO':
         sev = 'WARN'
-    out.append(f'Pending updates: pacman={len(cur.get("pacman_updates", []))} aur={len(cur.get("aur_updates", []))} brew={len(cur.get("brew_updates", []))}')
+    out.append(
+        'Pending updates: '
+        f'pacman={len(cur.get("pacman_updates", []))} '
+        f'aur={len(cur.get("aur_updates", []))} '
+        f'brew={len(cur.get("brew_updates", []))} '
+        f'apt={len(cur.get("apt_updates", []))} '
+        f'dnf={len(cur.get("dnf_updates", []))}'
+    )
 
     if not new_listeners and not new_rules and not gone_listeners and not gone_rules:
         out.append('No network/firewall drift vs baseline.')
