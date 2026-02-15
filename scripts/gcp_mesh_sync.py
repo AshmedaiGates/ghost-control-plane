@@ -95,14 +95,14 @@ def sync_command(command, target=None):
 
         print(f'[{name}] {host}...')
 
-        # Check if remote has gcp
-        rc, _, _ = run(ssh_cmd(info, 'which', 'gcp', batch=True))
+        # Check if remote has gcp (PATH-safe for non-interactive shells)
+        rc, _, _ = run(ssh_cmd(info, 'bash', '-lc', 'command -v gcp || test -x ~/.local/bin/gcp', batch=True))
         if rc != 0:
             print(f'  warning: gcp not found on {name}')
             continue
 
-        # Execute command
-        rc, out, err = run(ssh_cmd(info, 'gcp', *command.split(), batch=True))
+        # Execute command (prefer user-local install)
+        rc, out, err = run(ssh_cmd(info, 'bash', '-lc', f'~/.local/bin/gcp {command} || gcp {command}', batch=True))
         if rc == 0:
             print(f'  ✓ success')
             if out:
@@ -133,7 +133,7 @@ def mesh_status():
         # Check gcp version
         version = 'unknown'
         if status == 'up':
-            rc, out, _ = run(ssh_cmd(info, 'gcp', 'update', 'status', batch=True))
+            rc, out, _ = run(ssh_cmd(info, 'bash', '-lc', '~/.local/bin/gcp update status || gcp update status', batch=True))
             if rc == 0:
                 for ln in out.splitlines():
                     if 'local:' in ln:
