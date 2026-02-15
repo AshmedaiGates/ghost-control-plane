@@ -106,6 +106,21 @@ p_hooks = sub.add_parser('hooks', help='git hooks management')
 p_hooks.add_argument('action', choices=['install', 'uninstall', 'status'])
 p_hooks.add_argument('path', nargs='?', default='.')
 
+p_mesh_sync = sub.add_parser('mesh-sync', help='cross-device mesh sync')
+p_mesh_sync.add_argument('action', choices=['add', 'remove', 'list', 'status', 'sync', 'scene', 'backup'])
+p_mesh_sync.add_argument('target', nargs='?')
+p_mesh_sync.add_argument('--host')
+p_mesh_sync.add_argument('--user')
+
+p_auto = sub.add_parser('auto', help='self-modifying automation')
+p_auto.add_argument('action', choices=['learn', 'list', 'enable', 'disable'])
+p_auto.add_argument('rule_id', nargs='?')
+
+p_migrate = sub.add_parser('migrate', help='distro-hop assistant')
+p_migrate.add_argument('action', choices=['snapshot', 'list', 'restore', 'export'])
+p_migrate.add_argument('path', nargs='?')
+p_migrate.add_argument('--label')
+
 sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
 
 args = parser.parse_args()
@@ -250,6 +265,30 @@ if args.cmd == 'test':
 
 if args.cmd == 'hooks':
     cmd = py('gcp_hooks.py', args.action, args.path)
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'mesh-sync':
+    cmd = py('gcp_mesh_sync.py', args.action)
+    if args.target:
+        cmd.append(args.target)
+    if args.host:
+        cmd.extend(['--host', args.host])
+    if args.user:
+        cmd.extend(['--user', args.user])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'auto':
+    cmd = py('gcp_auto.py', args.action)
+    if args.rule_id:
+        cmd.append(args.rule_id)
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'migrate':
+    cmd = py('gcp_migrate.py', args.action)
+    if args.path:
+        cmd.append(args.path)
+    if args.label:
+        cmd.extend(['--label', args.label])
     raise SystemExit(run(cmd))
 
 parser.print_help()

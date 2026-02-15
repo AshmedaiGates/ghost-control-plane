@@ -42,7 +42,10 @@ ghost-control-plane/
     gcp_cognition.py     # project cognition layer
     gcp_updater.py       # self-updater (backup/update/verify)
     gcp_test.py          # integration test suite
-    gcp_hooks.py         # git hooks installer  systemd/user/
+    gcp_hooks.py         # git hooks installer
+    gcp_mesh_sync.py     # cross-device mesh sync
+    gcp_auto.py          # self-modifying automation
+    gcp_migrate.py       # distro-hop assistant  systemd/user/
     gcp-snapshot.service
     gcp-snapshot.timer
     gcp-autopilot.service
@@ -520,6 +523,59 @@ Auto-detects project type and installs appropriate hooks:
 - **Node**: npm run lint, npm test
 - **Rust**: cargo fmt, cargo clippy, cargo test
 - **Go**: gofmt, go vet, go test
+
+## Cross-Device Mesh Sync (Layer 16)
+
+`gcp_mesh_sync.py` propagates commands across multiple machines:
+
+```bash
+gcp mesh-sync add laptop 192.168.1.50 --user ghost
+gcp mesh-sync add server myserver.example.com
+gcp mesh-sync list
+gcp mesh-sync status
+gcp mesh-sync sync "scene game --apply"     # sync to all
+gcp mesh-sync scene game --target laptop    # sync scene to one
+gcp mesh-sync backup                         # trigger backups everywhere
+```
+
+Requires SSH key auth to remote nodes.
+
+## Self-Modifying Automation (Layer 17)
+
+`gcp_auto.py` learns from your usage and suggests automation:
+
+```bash
+gcp auto learn     # analyze patterns, suggest rules
+gcp auto list      # view generated rules
+gcp auto enable rule_001   # enable a rule
+gcp auto disable rule_001  # disable a rule
+```
+
+Analyzes `actions.log` to find:
+- Frequently used scenes → suggests time-based auto-switch
+- Workload patterns → suggests battery-aware modes
+
+All rules are created **disabled** (safe-by-default). Review before enabling.
+
+## Distro-Hop Assistant (Layer 18)
+
+`gcp_migrate.py` captures complete system state for migration:
+
+```bash
+gcp migrate snapshot                    # capture current state
+gcp migrate snapshot --label pre-nix    # named snapshot
+gcp migrate list                        # list snapshots
+gcp migrate restore 20260214-...        # show restore steps
+gcp migrate export ~/backup.tar.xz      # portable bundle
+```
+
+Captures:
+- Installed packages (pacman/apt/dnf)
+- Dotfiles (~/.config, shell configs)
+- Enabled user services
+- GCP checkpoints and state
+
+Creates portable bundle you can extract on fresh install.
 
 ## Next phase ideas
 
