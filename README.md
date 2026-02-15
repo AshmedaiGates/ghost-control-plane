@@ -45,7 +45,11 @@ ghost-control-plane/
     gcp_hooks.py         # git hooks installer
     gcp_mesh_sync.py     # cross-device mesh sync
     gcp_auto.py          # self-modifying automation
-    gcp_migrate.py       # distro-hop assistant  systemd/user/
+    gcp_migrate.py       # distro-hop assistant
+    gcp_predict.py       # predictive hardware failure
+    gcp_collab.py        # real-time collaboration
+    gcp_storage.py       # encrypted distributed storage
+    gcp_ci.py            # automatic CI/CD  systemd/user/
     gcp-snapshot.service
     gcp-snapshot.timer
     gcp-autopilot.service
@@ -576,6 +580,69 @@ Captures:
 - GCP checkpoints and state
 
 Creates portable bundle you can extract on fresh install.
+
+## Predictive Hardware Failure (Layer 19)
+
+`gcp_predict.py` monitors hardware health and predicts failures:
+
+```bash
+gcp predict         # run prediction analysis
+gcp predict status  # quick health check
+gcp predict collect # record snapshot only
+```
+
+Analyzes:
+- NVMe SSD wear level
+- CPU temperature trends
+- SMART data anomalies
+
+Alerts on:
+- SSD wear > 70%
+- Rising temperatures
+- Reallocated sectors
+
+## Real-Time Collaboration (Layer 20)
+
+`gcp_collab.py` shares clipboard/sessions across devices:
+
+```bash
+gcp collab server                    # start collab daemon
+gcp collab clip-send laptop          # send clipboard to laptop
+gcp collab clip-recv laptop          # receive clipboard from laptop
+gcp collab tmux-share laptop         # share tmux session
+gcp collab code laptop file.py:42    # send code pointer
+gcp collab peers                     # list online peers
+```
+
+Requires mesh nodes configured. Runs on port 17472.
+
+## Encrypted Distributed Storage (Layer 21)
+
+`gcp_storage.py` personal encrypted storage pool:
+
+```bash
+gcp storage store secret.pdf                # encrypt and chunk
+gcp storage retrieve <hash> ~/out.pdf --passphrase <key>
+gcp storage sync laptop                     # replicate to node
+gcp storage list                            # show stored files
+```
+
+- AES-256 encryption via GPG
+- Content-addressed chunks
+- Replicates across mesh nodes
+
+## Automatic CI/CD (Layer 22)
+
+`gcp_ci.py` auto test/build/deploy on git push:
+
+```bash
+gcp ci init . --name myproject    # configure pipeline
+gcp ci run myproject              # run tests
+gcp ci run myproject --deploy mesh:server
+gcp ci list                       # show pipelines
+```
+
+Auto-detects project type (Python/Node/Rust/Go) and runs appropriate steps.
 
 ## Next phase ideas
 

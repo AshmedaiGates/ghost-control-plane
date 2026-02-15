@@ -121,6 +121,32 @@ p_migrate.add_argument('action', choices=['snapshot', 'list', 'restore', 'export
 p_migrate.add_argument('path', nargs='?')
 p_migrate.add_argument('--label')
 
+p_predict = sub.add_parser('predict', help='predictive hardware failure')
+p_predict.add_argument('action', choices=['predict', 'status', 'collect'], nargs='?', default='predict')
+
+p_collab = sub.add_parser('collab', help='real-time collaboration')
+p_collab.add_argument('action', choices=['server', 'clip-send', 'clip-recv', 'tmux-share', 'code', 'peers'])
+p_collab.add_argument('target', nargs='?')
+p_collab.add_argument('file', nargs='?')
+p_collab.add_argument('--line', type=int, default=1)
+p_collab.add_argument('--session', default='shared')
+
+p_storage = sub.add_parser('storage', help='encrypted distributed storage')
+p_storage.add_argument('action', choices=['store', 'retrieve', 'sync', 'list'])
+p_storage.add_argument('file', nargs='?')
+p_storage.add_argument('output', nargs='?')
+p_storage.add_argument('--name')
+p_storage.add_argument('--passphrase')
+p_storage.add_argument('--hash')
+p_storage.add_argument('--node')
+
+p_ci = sub.add_parser('ci', help='automatic CI/CD')
+p_ci.add_argument('action', choices=['init', 'run', 'list'])
+p_ci.add_argument('name', nargs='?')
+p_ci.add_argument('--path', default='.')
+p_ci.add_argument('--name')
+p_ci.add_argument('--deploy')
+
 sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
 
 args = parser.parse_args()
@@ -289,6 +315,50 @@ if args.cmd == 'migrate':
         cmd.append(args.path)
     if args.label:
         cmd.extend(['--label', args.label])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'predict':
+    cmd = py('gcp_predict.py', args.action)
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'collab':
+    cmd = py('gcp_collab.py', args.action)
+    if args.target:
+        cmd.append(args.target)
+    if args.file:
+        cmd.append(args.file)
+    if args.line != 1:
+        cmd.extend(['--line', str(args.line)])
+    if args.session != 'shared':
+        cmd.extend(['--session', args.session])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'storage':
+    cmd = py('gcp_storage.py', args.action)
+    if args.file:
+        cmd.append(args.file)
+    if args.output:
+        cmd.append(args.output)
+    if args.name:
+        cmd.extend(['--name', args.name])
+    if args.passphrase:
+        cmd.extend(['--passphrase', args.passphrase])
+    if args.hash:
+        cmd.extend(['--hash', args.hash])
+    if args.node:
+        cmd.extend(['--node', args.node])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'ci':
+    cmd = py('gcp_ci.py', args.action)
+    if args.action == 'init':
+        cmd.append(args.path)
+        if hasattr(args, 'name') and args.name:
+            cmd.extend(['--name', args.name])
+    elif args.name:
+        cmd.append(args.name)
+    if args.deploy:
+        cmd.extend(['--deploy', args.deploy])
     raise SystemExit(run(cmd))
 
 parser.print_help()
