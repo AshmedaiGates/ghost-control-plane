@@ -40,7 +40,9 @@ ghost-control-plane/
     gcp_battle.py        # emergency battle commands
     gcp_dashboard.py     # system dashboard
     gcp_cognition.py     # project cognition layer
-  systemd/user/
+    gcp_updater.py       # self-updater (backup/update/verify)
+    gcp_test.py          # integration test suite
+    gcp_hooks.py         # git hooks installer  systemd/user/
     gcp-snapshot.service
     gcp-snapshot.timer
     gcp-autopilot.service
@@ -476,27 +478,48 @@ gcp dashboard --live       # auto-refresh every 5s
 
 Shows health, power/audio/network state, temps, active timers, quick commands.
 
-## Project Cognition (Layer 12)
+## Self-Updater (Layer 13)
 
-`gcp_cognition.py` auto-detects project types and suggests activation:
+`gcp_updater.py` checks for git updates, backs up, applies, and verifies:
 
 ```bash
-gcp cognition detect                    # detect project type
-gcp cognition analyze                   # full project analysis
-gcp cognition analyze /path/to/project  # analyze specific path
-gcp cognition auto-activate             # auto-activate venv/env
+gcp update status    # check local vs remote
+gcp update check     # check and notify if update available
+gcp update           # full update (checkpoint + backup + pull + verify)
 ```
 
-Supported project types:
-- **Python**: detects venv, requirements.txt, pyproject.toml
-- **Node**: detects package.json, pnpm/yarn/npm
-- **Rust**: detects Cargo.toml
-- **Go**: detects go.mod
+Process:
+1. Create checkpoint before any changes
+2. Run encrypted backup
+3. Pull latest from origin/master
+4. Run integration tests to verify
 
-Fish integration (already active):
-- Automatically detects when you `cd` into a project
-- Shows `[Ghost] <type> project detected` notification
-- Run `gcp-auto` to auto-activate environment
+## Integration Tests (Layer 14)
+
+`gcp_test.py` validates all GCP layers work correctly:
+
+```bash
+gcp test    # run full test suite
+```
+
+Tests: checkpoint, scene, guard, soc, profile, autopilot, backup, audio, network, qos, cache, dashboard, cognition.
+
+## Git Hooks (Layer 15)
+
+`gcp_hooks.py` installs project-specific git hooks:
+
+```bash
+gcp hooks install          # install hooks for current project
+gcp hooks install /path    # install for specific path
+gcp hooks uninstall        # remove gcp hooks
+gcp hooks status           # check hook status
+```
+
+Auto-detects project type and installs appropriate hooks:
+- **Python**: black, flake8, pytest
+- **Node**: npm run lint, npm test
+- **Rust**: cargo fmt, cargo clippy, cargo test
+- **Go**: gofmt, go vet, go test
 
 ## Next phase ideas
 

@@ -97,6 +97,15 @@ p_cog = sub.add_parser('cognition', help='project cognition layer')
 p_cog.add_argument('action', choices=['detect', 'analyze', 'auto-activate'])
 p_cog.add_argument('path', nargs='?', default='.')
 
+p_updater = sub.add_parser('update', help='self-updater (backup, update, verify)')
+p_updater.add_argument('action', nargs='?', choices=['status', 'check', 'update'], default='status')
+
+p_test = sub.add_parser('test', help='integration test suite')
+
+p_hooks = sub.add_parser('hooks', help='git hooks management')
+p_hooks.add_argument('action', choices=['install', 'uninstall', 'status'])
+p_hooks.add_argument('path', nargs='?', default='.')
+
 sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
 
 args = parser.parse_args()
@@ -229,6 +238,18 @@ if args.cmd == 'cognition':
     cmd = py('gcp_cognition.py', args.action)
     if args.path and args.path != '.':
         cmd.append(args.path)
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'update':
+    cmd = py('gcp_updater.py', args.action)
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'test':
+    cmd = py('gcp_test.py')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'hooks':
+    cmd = py('gcp_hooks.py', args.action, args.path)
     raise SystemExit(run(cmd))
 
 parser.print_help()
