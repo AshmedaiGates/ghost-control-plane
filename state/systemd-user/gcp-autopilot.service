@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost Control Plane autopilot check (safe)
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_autopilot.py --dry-run
+Nice=10
+IOSchedulingClass=idle

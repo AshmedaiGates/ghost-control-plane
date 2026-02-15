@@ -1,0 +1,9 @@
+[thresholds]
+high_cpu_temp_c = 90.0
+high_nvme_temp_c = 75.0
+high_mem_used_ratio = 0.90
+slow_boot_userspace_sec = 12.0
+
+[recommendations]
+min_snapshots_for_trend = 5
+error_window_minutes = 30

@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost AI mesh ops round (read-only)
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_mesh.py --intent ops-round --run
+Nice=10
+IOSchedulingClass=idle

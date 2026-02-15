@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "safeByDefault": true,
+  "allowApplyByDefault": false,
+  "maxCommandSeconds": 120,
+  "intents": {
+    "health": { "allowApply": false },
+    "drift": { "allowApply": false },
+    "snapshot": { "allowApply": false },
+    "stabilize": { "allowApply": true },
+    "autopilot": { "allowApply": true },
+    "scene": { "allowApply": true },
+    "repro": { "allowApply": true },
+    "ops-round": { "allowApply": false }
+  }
+}

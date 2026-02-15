@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost SOC drift snapshot/report (read-only)
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_soc.py --report
+Nice=10
+IOSchedulingClass=idle

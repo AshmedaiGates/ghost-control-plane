@@ -1,0 +1,10 @@
+[Unit]
+Description=Ghost AI mesh periodic ops round
+
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=10min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

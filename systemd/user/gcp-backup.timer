@@ -1,0 +1,10 @@
+[Unit]
+Description=Ghost encrypted backup (daily)
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=false
+
+[Install]
+WantedBy=timers.target

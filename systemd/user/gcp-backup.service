@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost encrypted backup run
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_backup.py run --apply
+Nice=10
+IOSchedulingClass=idle

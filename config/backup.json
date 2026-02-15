@@ -1,0 +1,12 @@
+{
+  "destinationDir": "/home/ghost/Backups/ghost-control-plane",
+  "sources": [
+    "/home/ghost/.openclaw/workspace/ghost-control-plane",
+    "/home/ghost/.config/fish",
+    "/home/ghost/.config/systemd/user",
+    "/home/ghost/.openclaw/openclaw.json"
+  ],
+  "retention": {
+    "keepLast": 14
+  }
+}

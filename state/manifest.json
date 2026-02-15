@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "generated_at": "2026-02-14T21:08:28.517798",
+  "power_profile": "performance",
+  "timers": {
+    "gcp-snapshot.service": {},
+    "gcp-snapshot.timer": {
+      "enabled": "enabled",
+      "active": "active"
+    },
+    "gcp-autopilot.service": {},
+    "gcp-autopilot.timer": {
+      "enabled": "enabled",
+      "active": "active"
+    },
+    "gcp-selfheal.service": {},
+    "gcp-selfheal.timer": {
+      "enabled": "enabled",
+      "active": "active"
+    },
+    "gcp-soc-report.service": {},
+    "gcp-soc-report.timer": {
+      "enabled": "enabled",
+      "active": "active"
+    },
+    "gcp-mesh-ops.service": {},
+    "gcp-mesh-ops.timer": {
+      "enabled": "enabled",
+      "active": "active"
+    }
+  },
+  "units": {
+    "gcp-snapshot.service": {
+      "present": true,
+      "sha256": "aebf20679b251738bd2fcbea1b7f9eee4f48b695d1e3ebd5b597600da89db1b5",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-snapshot.service"
+    },
+    "gcp-snapshot.timer": {
+      "present": true,
+      "sha256": "5e4b6ac8f14161a85dc7a2d1f52135617d116cf21418f2b245a209eb0b99add3",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-snapshot.timer"
+    },
+    "gcp-autopilot.service": {
+      "present": true,
+      "sha256": "b74d6d75957342d27b7c7a04c8d7cdb8e5ff8b015699317b97c6303192800015",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-autopilot.service"
+    },
+    "gcp-autopilot.timer": {
+      "present": true,
+      "sha256": "716a47427aa1398375a53871f0b59707b403b6d7e280fa180924b21247c81ef2",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-autopilot.timer"
+    },
+    "gcp-selfheal.service": {
+      "present": true,
+      "sha256": "d14f307f01d3c52bd286d3663bf2b0d04cb063e3b2d51cbbeb9c6798af24ad4d",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-selfheal.service"
+    },
+    "gcp-selfheal.timer": {
+      "present": true,
+      "sha256": "cab34bbfd91f51d7d4db0e0284890627affb14678f33a5796ea4fa0f246bc760",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-selfheal.timer"
+    },
+    "gcp-soc-report.service": {
+      "present": true,
+      "sha256": "831732bd598358c7b1a869fddfcc744da26a92dd300fd3285fb8ffe8c86f897d",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-soc-report.service"
+    },
+    "gcp-soc-report.timer": {
+      "present": true,
+      "sha256": "5fa4507002022116e163bb0f1d04f1387a24b732b148173a05ebd6532f112bc3",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-soc-report.timer"
+    },
+    "gcp-mesh-ops.service": {
+      "present": true,
+      "sha256": "0bc2e526bb6a234ae0369c13c5c5616739c8fc8413df08eca8032ab393a3c1a7",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-mesh-ops.service"
+    },
+    "gcp-mesh-ops.timer": {
+      "present": true,
+      "sha256": "338a08cbaf2077754274709c5b5371d7aeb3c748f8d4ab450db3a765eb0af3bd",
+      "source": "/home/ghost/.openclaw/workspace/ghost-control-plane/state/systemd-user/gcp-mesh-ops.timer"
+    }
+  }
+}

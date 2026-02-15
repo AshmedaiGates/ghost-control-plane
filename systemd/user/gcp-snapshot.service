@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost Control Plane snapshot capture
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_snapshot.py
+Nice=10
+IOSchedulingClass=idle

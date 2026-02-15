@@ -1,0 +1,9 @@
+[Unit]
+Description=Ghost Control Plane self-heal scan (dry-run)
+After=default.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env python3 %h/.openclaw/workspace/ghost-control-plane/scripts/gcp_selfheal.py --dry-run
+Nice=10
+IOSchedulingClass=idle

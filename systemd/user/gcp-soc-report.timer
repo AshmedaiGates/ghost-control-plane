@@ -1,0 +1,10 @@
+[Unit]
+Description=Ghost SOC daily drift report (read-only)
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=45min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

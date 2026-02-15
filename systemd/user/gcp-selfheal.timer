@@ -1,0 +1,10 @@
+[Unit]
+Description=Ghost Control Plane daily self-heal scan (dry-run)
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

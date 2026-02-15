@@ -1,0 +1,11 @@
+[Unit]
+Description=Ghost Control Plane periodic snapshots
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=30min
+AccuracySec=5min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

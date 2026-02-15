@@ -1,0 +1,11 @@
+[Unit]
+Description=Ghost Control Plane autopilot periodic check
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=15min
+AccuracySec=2min
+Persistent=false
+
+[Install]
+WantedBy=timers.target

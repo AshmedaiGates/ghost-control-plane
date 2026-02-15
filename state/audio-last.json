@@ -1,0 +1,6 @@
+{
+  "clock.force-quantum": "128",
+  "clock.force-rate": "48000",
+  "clock.quantum": "1024",
+  "clock.rate": "48000"
+}

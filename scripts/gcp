@@ -1,0 +1,234 @@
+#!/usr/bin/env python3
+import argparse
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent
+PROJECT = ROOT.parent
+
+
+def run(cmd):
+    p = subprocess.run(cmd)
+    return p.returncode
+
+
+def py(script, *args):
+    return [sys.executable, str(ROOT / script), *args]
+
+
+def install_user_bin():
+    dst_dir = Path.home() / '.local' / 'bin'
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst = dst_dir / 'gcp'
+    src = ROOT / 'gcp'
+    if dst.exists() or dst.is_symlink():
+        dst.unlink()
+    dst.symlink_to(src)
+    print(f'installed={dst} -> {src}')
+    print('Tip: ensure ~/.local/bin is on PATH')
+
+
+parser = argparse.ArgumentParser(description='Ghost Control Plane unified CLI')
+sub = parser.add_subparsers(dest='cmd')
+
+sub.add_parser('status', help='quick health+drift+autopilot dry-run')
+
+p_guard = sub.add_parser('guard', help='health guard score')
+p_guard.add_argument('--last', default='6')
+
+p_soc = sub.add_parser('soc', help='SOC snapshot/diff/report')
+p_soc.add_argument('action', choices=['snapshot', 'baseline-set', 'baseline-show', 'diff', 'report'])
+
+p_scene = sub.add_parser('scene', help='scene switcher')
+p_scene.add_argument('name', choices=['game', 'code', 'focus', 'travel', 'stream'])
+p_scene.add_argument('--apply', action='store_true')
+
+p_auto = sub.add_parser('autopilot', help='autopilot decision/apply')
+p_auto.add_argument('--apply', action='store_true')
+
+p_heal = sub.add_parser('selfheal', help='safe self-heal')
+p_heal.add_argument('--apply', action='store_true')
+
+p_ck = sub.add_parser('checkpoint', help='checkpoint management')
+p_ck.add_argument('action', choices=['create', 'list'])
+p_ck.add_argument('--label', default='manual')
+
+p_repro = sub.add_parser('repro', help='repro state export/apply')
+p_repro.add_argument('action', choices=['export', 'dry-run', 'apply'])
+
+p_mesh = sub.add_parser('mesh', help='mesh route/execute')
+p_mesh.add_argument('--task', default='')
+p_mesh.add_argument('--run', action='store_true')
+p_mesh.add_argument('--apply', action='store_true')
+p_mesh.add_argument('--allow-apply', action='store_true')
+
+p_domain = sub.add_parser('domain', help='domain-focused read-only checks')
+p_domain.add_argument('name', choices=['network', 'dev', 'storage', 'security', 'automation'])
+
+p_audio = sub.add_parser('audio', help='audio profiles/status/rollback')
+p_audio.add_argument('action', choices=['status', 'balanced', 'lowlatency', 'studio', 'powersave', 'rollback'])
+p_audio.add_argument('--apply', action='store_true')
+
+p_net = sub.add_parser('network', help='network DNS profile/status/rollback')
+p_net.add_argument('action', choices=['status', 'isp-auto', 'latency', 'privacy', 'rollback'])
+p_net.add_argument('--apply', action='store_true')
+
+p_bak = sub.add_parser('backup', help='encrypted backups')
+p_bak.add_argument('action', choices=['status', 'init-passphrase', 'run', 'verify'])
+p_bak.add_argument('--apply', action='store_true')
+
+p_qos = sub.add_parser('qos', help='network QoS tuning')
+p_qos.add_argument('action', choices=['status', 'default', 'gaming', 'streaming', 'rollback'])
+p_qos.add_argument('--apply', action='store_true')
+p_qos.add_argument('--iface')
+
+p_cache = sub.add_parser('cache', help='build cache acceleration')
+p_cache.add_argument('action', choices=['status', 'apply'])
+
+p_battle = sub.add_parser('battle', help='emergency battle commands')
+p_battle.add_argument('action', choices=['network-reset', 'kill-stuck', 'emergency-perf', 'memory-free', 'fix-wifi', 'all'])
+
+p_dash = sub.add_parser('dashboard', help='system dashboard')
+p_dash.add_argument('--live', action='store_true')
+p_dash.add_argument('--interval', type=int, default=5)
+
+p_cog = sub.add_parser('cognition', help='project cognition layer')
+p_cog.add_argument('action', choices=['detect', 'analyze', 'auto-activate'])
+p_cog.add_argument('path', nargs='?', default='.')
+
+sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
+
+args = parser.parse_args()
+
+if args.cmd == 'install':
+    install_user_bin()
+    raise SystemExit(0)
+
+if args.cmd == 'status':
+    rc = run(py('gcp_guard.py', '--last', '6'))
+    rc = rc or run(py('gcp_soc.py', '--report'))
+    rc = rc or run(py('gcp_autopilot.py', '--dry-run'))
+    raise SystemExit(rc)
+
+if args.cmd == 'guard':
+    raise SystemExit(run(py('gcp_guard.py', '--last', str(args.last))))
+
+if args.cmd == 'soc':
+    mapping = {
+        'snapshot': ['--snapshot'],
+        'baseline-set': ['--baseline', 'set-latest'],
+        'baseline-show': ['--baseline', 'show'],
+        'diff': ['--diff'],
+        'report': ['--report'],
+    }
+    raise SystemExit(run(py('gcp_soc.py', *mapping[args.action])))
+
+if args.cmd == 'scene':
+    mode = '--apply' if args.apply else '--dry-run'
+    raise SystemExit(run(py('gcp_scene.py', '--scene', args.name, mode)))
+
+if args.cmd == 'autopilot':
+    mode = '--apply' if args.apply else '--dry-run'
+    raise SystemExit(run(py('gcp_autopilot.py', mode)))
+
+if args.cmd == 'selfheal':
+    mode = '--apply' if args.apply else '--dry-run'
+    raise SystemExit(run(py('gcp_selfheal.py', mode)))
+
+if args.cmd == 'checkpoint':
+    if args.action == 'create':
+        raise SystemExit(run(py('gcp_checkpoint.py', '--create', '--label', args.label)))
+    raise SystemExit(run(py('gcp_checkpoint.py', '--list')))
+
+if args.cmd == 'repro':
+    mapping = {
+        'export': ['--export'],
+        'dry-run': ['--dry-run'],
+        'apply': ['--apply'],
+    }
+    raise SystemExit(run(py('gcp_repro.py', *mapping[args.action])))
+
+if args.cmd == 'mesh':
+    cmd = py('gcp_mesh.py', '--task', args.task)
+    if args.run:
+        cmd.append('--run')
+    if args.apply:
+        cmd.append('--apply')
+    if args.allow_apply:
+        cmd.append('--allow-apply')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'domain':
+    raise SystemExit(run(py('gcp_domain.py', args.name)))
+
+if args.cmd == 'audio':
+    if args.action == 'status':
+        raise SystemExit(run(py('gcp_audio.py', 'status')))
+    if args.action == 'rollback':
+        cmd = py('gcp_audio.py', 'rollback')
+    else:
+        cmd = py('gcp_audio.py', 'profile', args.action)
+    if args.apply:
+        cmd.append('--apply')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'network':
+    if args.action == 'status':
+        raise SystemExit(run(py('gcp_network.py', 'status')))
+    if args.action == 'rollback':
+        cmd = py('gcp_network.py', 'rollback')
+    else:
+        cmd = py('gcp_network.py', 'profile', args.action)
+    if args.apply:
+        cmd.append('--apply')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'backup':
+    if args.action == 'status':
+        raise SystemExit(run(py('gcp_backup.py', 'status')))
+    if args.action == 'init-passphrase':
+        raise SystemExit(run(py('gcp_backup.py', 'init-passphrase')))
+    if args.action == 'verify':
+        raise SystemExit(run(py('gcp_backup.py', 'verify')))
+    cmd = py('gcp_backup.py', 'run')
+    if args.apply:
+        cmd.append('--apply')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'qos':
+    if args.action == 'status':
+        cmd = py('gcp_qos.py', 'status')
+    elif args.action == 'rollback':
+        cmd = py('gcp_qos.py', 'rollback')
+    else:
+        cmd = py('gcp_qos.py', 'apply', args.action)
+        if args.apply:
+            cmd.append('--apply')
+        if args.iface:
+            cmd.extend(['--iface', args.iface])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'cache':
+    if args.action == 'status':
+        raise SystemExit(run(py('gcp_cache.py', 'status')))
+    raise SystemExit(run(py('gcp_cache.py', 'apply')))
+
+if args.cmd == 'battle':
+    raise SystemExit(run(py('gcp_battle.py', args.action)))
+
+if args.cmd == 'dashboard':
+    cmd = py('gcp_dashboard.py')
+    if args.live:
+        cmd.append('--live')
+    if args.interval != 5:
+        cmd.extend(['--interval', str(args.interval)])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'cognition':
+    cmd = py('gcp_cognition.py', args.action)
+    if args.path and args.path != '.':
+        cmd.append(args.path)
+    raise SystemExit(run(cmd))
+
+parser.print_help()
