@@ -159,6 +159,9 @@ p_plan.add_argument('--ram', type=int, default=34, help='VPS RAM in GB')
 p_plan.add_argument('--gpu', action='store_true', help='VPS has GPU')
 p_plan.add_argument('--compare', action='store_true', help='Compare GPU VPS costs')
 
+p_android = sub.add_parser('android', help='Android phone integration')
+p_android.add_argument('action', choices=['termux', 'dashboard', 'tasker', 'ssh'], nargs='?')
+
 sub.add_parser('install', help='install gcp into ~/.local/bin/gcp')
 
 args = parser.parse_args()
@@ -392,6 +395,12 @@ if args.cmd == 'plan':
         cmd.append('--gpu')
     if args.compare:
         cmd.append('--compare')
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'android':
+    cmd = py('gcp_android.py')
+    if args.action:
+        cmd.append(args.action)
     raise SystemExit(run(cmd))
 
 parser.print_help()

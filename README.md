@@ -51,7 +51,8 @@ ghost-control-plane/
     gcp_storage.py       # encrypted distributed storage
     gcp_ci.py            # automatic CI/CD
     gcp_vps.py           # VPS provisioner
-    gcp_plan.py          # workload planner  systemd/user/
+    gcp_plan.py          # workload planner
+    gcp_android.py       # Android phone integration  systemd/user/
     gcp-snapshot.service
     gcp-snapshot.timer
     gcp-autopilot.service
@@ -678,14 +679,57 @@ Shows optimal distribution between laptop and VPS. For your $51 34GB setup:
 - VPS: CI/CD, CPU LLMs (13B-24B), backups, storage
 - **Savings vs GPU VPS: $250-550/mo**
 
+## Android Integration (Layer 25)
+
+`gcp_android.py` connects your phone to the control plane:
+
+```bash
+gcp android termux      # Setup instructions for Termux Linux env
+gcp android dashboard   # Generate mobile web dashboard
+gcp android tasker      # Tasker automation setup
+gcp android ssh         # SSH control guide
+```
+
+### Mobile Dashboard
+
+```bash
+cd ~/.local/share/ghost-control-plane/android
+python3 -m http.server 8080
+# Open http://your-laptop-ip:8080 on phone
+```
+
+Features:
+- One-tap scene switching (Game/Code/Focus/Travel)
+- Quick actions (fix network, max perf, backup)
+- Health status view
+- Custom command input
+
+### Tasker Integration
+
+Create tasks in Tasker app:
+- **Event**: WiFi connected to home → Run `gcp scene game --apply`
+- **Event**: Time 9:00 AM → Run `gcp scene code --apply`
+- **Event**: Bluetooth disconnected → Run `gcp scene travel --apply`
+
+### Termux (Linux on Android)
+
+```bash
+# In Termux app:
+pkg install openssh
+ssh ghost@<your-laptop-ip>
+gcp status
+gcp scene game --apply
+```
+
 ## Full Stack Summary
 
-**24 Layers Total:**
+**25 Layers Total:**
 1-12: Core control plane (health, scenes, autopilot, backups, etc.)
 13-15: Testing & updates
 16-18: Mesh & learning
-19-22: Prediction, collaboration, storage, CI/CD  
+19-22: Prediction, collaboration, storage, CI/CD
 23-24: VPS provisioning & planning
+25: Android integration
 
 ## Next phase ideas
 
