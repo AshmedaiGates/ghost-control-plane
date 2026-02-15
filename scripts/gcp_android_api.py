@@ -62,21 +62,19 @@ class H(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(b'mobile-dashboard.html missing; run gcp android dashboard')
                 return
+
+            # Require valid token in dashboard URL when token auth is enabled
+            q = parse_qs(urlparse(self.path).query)
+            t = q.get('token', [''])[0]
+            if TOKEN and t != TOKEN:
+                return self._json(401, {'error': 'unauthorized'})
+
             html = DASH.read_text()
-            # append token helper script
-            html += """
-<script>
-const token = new URLSearchParams(location.search).get('token') || localStorage.getItem('gcp_token') || '';
-if (token) localStorage.setItem('gcp_token', token);
-const oldFetch = window.fetch;
-window.fetch = (u, o={}) => {
-  if (typeof u === 'string' && (u.startsWith('/api/'))) {
-    u += (u.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(token);
-  }
-  return oldFetch(u, o);
-};
-</script>
-"""
+            if TOKEN:
+                # Hardwire token into API calls to avoid browser/localStorage quirks
+                html = html.replace("'/api/run'", f"'/api/run?token={TOKEN}'")
+                html = html.replace("'/api/health'", f"'/api/health?token={TOKEN}'")
+
             data = html.encode()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
