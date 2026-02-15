@@ -9,8 +9,11 @@ PROFILE = ROOT / 'gcp_profile.py'
 
 
 def run(cmd):
-    p = subprocess.run(cmd, capture_output=True, text=True)
-    return p.returncode, (p.stdout or '').strip(), (p.stderr or '').strip()
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True)
+        return p.returncode, (p.stdout or '').strip(), (p.stderr or '').strip()
+    except FileNotFoundError as e:
+        return 127, '', str(e)
 
 
 def ac_online():
