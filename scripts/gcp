@@ -154,6 +154,13 @@ p_ci.add_argument('--path', default='.')
 p_ci.add_argument('--name')
 p_ci.add_argument('--deploy')
 
+p_ci_remote = sub.add_parser('ci-remote', help='run CI on VPS node')
+p_ci_remote.add_argument('action', choices=['list', 'run'])
+p_ci_remote.add_argument('name', nargs='?', default='ghost-control-plane')
+p_ci_remote.add_argument('--host', default='67.217.61.166')
+p_ci_remote.add_argument('--user', default='ghost')
+p_ci_remote.add_argument('--key', default=str(Path.home() / '.ssh' / 'gcp_vps_key'))
+
 p_vps = sub.add_parser('vps', help='provision VPS with GCP')
 p_vps.add_argument('ip', nargs='?', help='VPS IP address')
 p_vps.add_argument('--user', default='root', help='Initial SSH user')
@@ -393,6 +400,13 @@ if args.cmd == 'ci':
         cmd.append(args.name)
     if args.deploy:
         cmd.extend(['--deploy', args.deploy])
+    raise SystemExit(run(cmd))
+
+if args.cmd == 'ci-remote':
+    cmd = py('gcp_ci_remote.py', args.action)
+    if args.action == 'run' and args.name:
+        cmd.append(args.name)
+    cmd.extend(['--host', args.host, '--user', args.user, '--key', args.key])
     raise SystemExit(run(cmd))
 
 if args.cmd == 'vps':

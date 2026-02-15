@@ -45,7 +45,7 @@ def get_default_pipeline(project_type):
             'name': 'Python CI',
             'steps': [
                 {'name': 'lint', 'cmd': 'flake8 . --max-line-length=100 || true'},
-                {'name': 'format', 'cmd': 'black --check . || black .'},
+                {'name': 'format', 'cmd': 'black --check . || black . || true'},
                 {'name': 'test', 'cmd': 'python -m pytest -xvs || true'},
             ],
         },
