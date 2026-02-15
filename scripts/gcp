@@ -310,10 +310,15 @@ if args.cmd == 'hooks':
 
 if args.cmd == 'mesh-sync':
     cmd = py('gcp_mesh_sync.py', args.action)
-    if args.target:
-        cmd.append(args.target)
-    if args.host:
-        cmd.extend(['--host', args.host])
+    if args.action == 'add':
+        # gcp_mesh_sync.py add expects positional: name host [--user]
+        if args.target:
+            cmd.append(args.target)
+        if args.host:
+            cmd.append(args.host)
+    else:
+        if args.target:
+            cmd.append(args.target)
     if args.user:
         cmd.extend(['--user', args.user])
     raise SystemExit(run(cmd))
